@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Live Crypto Signals</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #f0f0f0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      margin: 15px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .pair {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .signal { margin-top: 10px; font-weight: bold; }
+    .buy { color: #00e676; }
+    .sell { color: #ff1744; }
+    .hold { color: #ffc107; }
+  </style>
+</head>
+<body>
+  <h1>Live Crypto Trading Signals</h1>
+  <div id="signals">Loading...</div>
+
+  <script>
+    const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'XRPUSDT'];
+    const targets = {
+      BTCUSDT: { buyBelow: 85000, sellAbove: 100000, stopLoss: 76000, takeProfit: 107000 },
+      ETHUSDT: { buyBelow: 1745, sellAbove: 2100, stopLoss: 1700, takeProfit: 2500 },
+      BNBUSDT: { buyBelow: 590, sellAbove: 680, stopLoss: 570, takeProfit: 706 },
+      XRPUSDT: { buyBelow: 2.20, sellAbove: 2.50, stopLoss: 2.10, takeProfit: 2.75 }
+    };
+
+    function getSignal(price, target) {
+      if (price < target.buyBelow) return { action: "Buy", class: "buy" };
+      if (price > target.sellAbove) return { action: "Sell", class: "sell" };
+      return { action: "Hold", class: "hold" };
+    }
+
+    async function loadPrices() {
+      const container = document.getElementById('signals');
+      container.innerHTML = '';
+      for (const symbol of symbols) {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+        const data = await res.json();
+        const price = parseFloat(data.price);
+        const t = targets[symbol];
+        const signal = getSignal(price, t);
+
+        container.innerHTML += `
+          <div class="card">
+            <div class="pair">${symbol.replace('USDT', '')}/USDT</div>
+            <div>Live Price: $${price.toLocaleString()}</div>
+            <div>Buy Below: $${t.buyBelow}</div>
+            <div>Sell Above: $${t.sellAbove}</div>
+            <div>Take Profit: $${t.takeProfit}</div>
+            <div>Stop Loss: $${t.stopLoss}</div>
+            <div class="signal ${signal.class}">Signal: ${signal.action}</div>
+          </div>
+        `;
+      }
+    }
+
+    loadPrices();
+  </script>
+</body>
+</html>
